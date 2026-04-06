@@ -58,7 +58,7 @@ I was able to use prompts like "What classes would you create for a pet care sch
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
-
+When the AI initially suggested keeping `DailyPlan` as its own class, I decided to remove it and have `Scheduler.generate_plan()` return a tuple instead. For a project of this size it felt like unnecessary complexity, and I wanted to keep the logic in one place.
 - How did you evaluate or verify what the AI suggested?
 I looked at the codebase and made sure the methods and classes made sense in the context of my existing design and suggestions.
 
@@ -69,12 +69,16 @@ I looked at the codebase and made sure the methods and classes made sense in the
 **a. What you tested**
 
 - What behaviors did you test?
+I tested edge cases (a pet with no tasks, a scheduler with no pets), sorting correctness (tasks ordered by `preferred_hour`, untimed tasks placed at the end), recurrence logic (daily and weekly tasks advancing their due date on completion, one-off tasks returning `None`), and conflict detection (overlapping time windows correctly flagged with pet and task names).
 - Why were these tests important?
+These are the behaviors most likely to break silently. A schedule that silently drops recurring tasks or misorders the timeline would look correct but give the owner wrong information, so I wanted confidence that the core logic held up before connecting it to the UI.
 
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
+I'm fairly confident — 19 tests all pass and they cover the main paths including boundary conditions like same start times and missing due dates. I'd rate it 4 out of 5. The area I'm least sure about is multi-pet priority interleaving and the preference-score bonus, which I didn't write dedicated tests for.
 - What edge cases would you test next if you had more time?
+I would test the `_interleave_by_pet` logic with three or more pets, the owner preference bonus when two tasks have equal raw priority, and the deferred conflict reason strings to make sure the right message is returned in each scenario.
 
 ---
 
@@ -83,12 +87,15 @@ I looked at the codebase and made sure the methods and classes made sense in the
 **a. What went well**
 
 - What part of this project are you most satisfied with?
+I'm most satisfied with the `Scheduler` class. It started simple and grew naturally — each feature (preference scoring, round-robin interleaving, overlap detection) had a clear reason behind it and fit into the pipeline cleanly. The fact that `generate_plan()` returns three things (scheduled, deferred, overlaps) means the UI has everything it needs without any extra calls.
 
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
+I would add dedicated tests for `_interleave_by_pet` and the preference scoring bonus. I would also revisit how `times_per_day` interacts with recurrence — right now a task expanded three times a day and a daily recurring task are handled separately, and I think there's a cleaner unified model there.
 
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+Starting with a UML diagram — even a rough one — made the implementation much smoother. Having a shared picture of the classes and relationships meant I could evaluate AI suggestions against a concrete design instead of just accepting whatever was generated. The diagram also made it easier to spot when a suggestion added unnecessary complexity, like the `DailyPlan` class I decided to drop.
 

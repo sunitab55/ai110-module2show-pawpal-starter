@@ -22,6 +22,10 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## UML Diagram
+
+![UML Diagram](uml.png)
+
 ## Smarter Scheduling
 
 The scheduling engine goes beyond a simple priority sort. Here is what it does and why.
