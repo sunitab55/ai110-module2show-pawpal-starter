@@ -57,6 +57,33 @@ Overlaps are returned as a third value from `generate_plan()` and displayed in t
 
 ---
 
+## Testing PawPal+
+
+### Run the tests
+
+```bash
+python -m pytest tests/test_pawpal.py -v
+```
+
+### What the tests cover
+
+| Area | Tests |
+|---|---|
+| **Edge cases** | Pet with no tasks, scheduler with no pets, scheduler whose pets have no tasks |
+| **Sorting correctness** | Tasks returned in chronological order by `preferred_hour`; untimed tasks placed at the end; two tasks at the same hour both appear in the result |
+| **Recurrence logic** | Daily task produces a next-day task on completion; weekly task advances by 7 days; one-off task returns `None`; `Pet.complete_task()` appends the next occurrence automatically; `due_date=None` defaults to today |
+| **Conflict detection** | Two tasks at the exact same hour are flagged as overlapping; partial window overlap is caught; non-overlapping tasks produce no warnings; untimed tasks are excluded from overlap detection; warning messages name the conflicting tasks |
+
+19 tests — 19 passing.
+
+### Confidence level
+
+**4 / 5 stars**
+
+The core scheduling behaviors — sorting, recurrence, and overlap detection — are each tested through multiple scenarios including boundary conditions (same start time, no due date, no tasks at all). The logic holds up well against the cases most likely to cause real-world bugs. One star is withheld because the tests do not yet cover multi-pet priority interleaving (`_interleave_by_pet`), the owner-preference scoring bonus, or the deferred-task conflict reason strings — behaviors that involve more complex interactions between components and would benefit from dedicated integration-style tests.
+
+---
+
 ## Getting started
 
 ### Setup
