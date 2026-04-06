@@ -22,6 +22,41 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Smarter Scheduling
+
+The scheduling engine goes beyond a simple priority sort. Here is what it does and why.
+
+### 1. Preference-aware priority scoring
+Every task is ranked by an effective priority score rather than its raw value. If a task's category (e.g. `"meds"`, `"walk"`) appears in the owner's preference list it receives a +1 bonus, breaking ties in favour of care types the owner has explicitly flagged as important.
+
+### 2. Fair pet representation (round-robin interleaving)
+Before the time budget is applied, tasks are reordered round-robin by pet. Pet 1's top task goes first, then pet 2's top task, then back to pet 1's second task, and so on. This prevents a pet with uniformly high-priority tasks from filling the entire day and leaving another pet with no scheduled care.
+
+### 3. Recurring task expansion
+Each task carries a `times_per_day` field. Before greedy scheduling runs, the task list is expanded so a task due three times a day occupies three slots and consumes its full share of the time budget — rather than being counted only once.
+
+### 4. Completed-task filtering
+Tasks already marked `is_completed` are silently skipped during scheduling. Marking a one-off task complete removes it from future plans. Marking a recurring task complete (via `Pet.complete_task()`) automatically creates the next occurrence with its due date advanced by `timedelta(days=1)` for daily tasks or `timedelta(weeks=1)` for weekly ones.
+
+### 5. Clock-ordered output (`sort_by_time`)
+After the budget pass, the scheduled tasks are sorted by `preferred_hour` (0–23) so the final plan reads as a real daily timeline. Tasks with no preferred hour are placed at the end.
+
+### 6. Deferred task reporting
+Tasks that do not fit the time budget are returned in a separate `deferred` list alongside a human-readable reason. Two reason types are possible:
+- `"time budget exceeded"` — the cumulative duration of higher-priority tasks left no room.
+- `"priority conflict with <pet>'s '<task>'"` — a task from a different pet with the same effective priority was scheduled first, squeezing this one out.
+
+### 7. Time-overlap detection (`_detect_overlaps`)
+After sorting by time, every pair of scheduled tasks with a `preferred_hour` is checked for window collisions using the interval overlap condition `a.start < b.end and b.start < a.end`. Each collision produces a named warning that identifies both pets, both tasks, and the exact HH:MM windows — for example:
+
+```
+WARNING: Dooshtu's 'Morning Walk' (07:00-07:30) overlaps with Booshtu's 'Medication' (07:00-07:05)
+```
+
+Overlaps are returned as a third value from `generate_plan()` and displayed in the Streamlit UI as `st.warning()` banners so the owner can reschedule one of the conflicting tasks.
+
+---
+
 ## Getting started
 
 ### Setup
