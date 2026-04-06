@@ -5,13 +5,23 @@
 **a. Initial design**
 
 - Briefly describe your initial UML design.
+I designed the system using five classes that separate the data (owner, pet, and tasks) from the logic (scheduling and planning). The Scheduler takes in the owner and pet information and produces a DailyPlan based on priorities and time constraints.
+I designed the system around an Owner who owns one or more Pets, each with a list of Tasks (walks, feeding, meds, etc.) that have a duration and priority. I created a Scheduler class that takes the owner and pet as input, applies constraints like available time, and sorts tasks by priority to produce a DailyPlan. The DailyPlan stores both the scheduled and skipped tasks, along with a reasoning explanation for why I constructed the plan that way.
 - What classes did you include, and what responsibilities did you assign to each?
+I included the following classes:
+- Owner: stores owner information and preferences.
+- Pet: stores pet information and a list of care tasks.
+- Task: represents a single care task with attributes like name, category, duration, and priority.
+- Scheduler: contains the logic to generate a plan based on the owner and pet information.
+Owner owns one or more Pets, each with a list of Tasks (walks, feeding, meds, etc.) that have a duration and priority. Scheduler uses the owner and pet information to create a plan!
+
 
 **b. Design changes**
 
 - Did your design change during implementation?
+Yes. I added the Frequency attribute to the Task class that the initial UML design did not include.
 - If yes, describe at least one change and why you made it.
-
+I made this change thinking about my own experience as a cat owner. My cat enjoys small portions multiple times a day!
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
